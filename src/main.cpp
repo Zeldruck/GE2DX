@@ -4,10 +4,11 @@
 #include "sdlpp_renderer.hpp"
 #include "sdlpp_texture.hpp"
 
+#include "vector2.hpp"
 
 int main(int argc, char** argv)
 {
-    SDLpp sdlpp;
+    /*SDLpp sdlpp;
 
     SDLpp_window windowpp("GE2DX", 1280, 720);
     SDLpp_renderer rendererpp(windowpp);
@@ -35,7 +36,7 @@ int main(int argc, char** argv)
         SDL_RenderCopy(rendererpp.GetHandle(), testTexture.GetHandle(), nullptr, nullptr);
 
         rendererpp.Present();
-    }
+    }*/
 
     return 0;
 }
