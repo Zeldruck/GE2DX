@@ -1,7 +1,6 @@
 ﻿#include "sdlpp_texture.hpp"
 #include "sdlpp_renderer.hpp"
-
-#include <SDL_image.h>
+#include "sdlpp_surface.hpp"
 
 SDLpp_texture::SDLpp_texture(SDLpp_texture&& _texturepp)
 {
@@ -17,11 +16,8 @@ SDLpp_texture::~SDLpp_texture()
 
 SDLpp_texture SDLpp_texture::LoadFromFile(SDLpp_renderer& _renderer, const std::string& _filepath)
 {
-	SDL_Surface* surface = IMG_Load(_filepath.c_str());
-
-	SDL_Texture* texture = SDL_CreateTextureFromSurface(_renderer.GetHandle(), surface);
-
-	SDL_FreeSurface(surface);
+	SDLpp_surface surface(_filepath);
+	SDL_Texture* texture = SDL_CreateTextureFromSurface(_renderer.GetHandle(), surface.GetHandle());
 
 	return SDLpp_texture(texture);
 }
