@@ -3,17 +3,24 @@
 #include "sdlpp_window.hpp"
 #include "sdlpp_renderer.hpp"
 #include "sdlpp_texture.hpp"
-
-#include "vector2.hpp"
+#include "sprite.hpp"
 
 int main(int argc, char** argv)
 {
-    /*SDLpp sdlpp;
+    SDLpp sdlpp;
 
     SDLpp_window windowpp("GE2DX", 1280, 720);
     SDLpp_renderer rendererpp(windowpp);
 
     SDLpp_texture testTexture = SDLpp_texture::LoadFromFile(rendererpp, "assets/test.jpg");
+
+    SDL_Rect wh;
+    wh.x = 0;
+    wh.y = 0;
+    wh.w = 1280;
+    wh.h = 720;
+
+    Sprite testSprite(testTexture, wh);
 
     bool isRunning = true;
 
@@ -33,10 +40,10 @@ int main(int argc, char** argv)
         rendererpp.SetDrawColor(0, 0, 0);
         rendererpp.Clear();
 
-        SDL_RenderCopy(rendererpp.GetHandle(), testTexture.GetHandle(), nullptr, nullptr);
+        testSprite.Draw(rendererpp, 0, 0);
 
         rendererpp.Present();
-    }*/
+    }
 
     return 0;
 }
