@@ -7,13 +7,21 @@
 class SDLpp_surface
 {
 public:
-	SDLpp_surface(const std::string&);
+	
 	SDLpp_surface(const SDLpp_surface&) = delete;
+	SDLpp_surface(SDLpp_surface&&) noexcept;
 	~SDLpp_surface();
 
-	SDL_Surface* GetHandle();
+	SDLpp_surface& operator=(const SDLpp_surface&) = delete;
+	SDLpp_surface& operator=(SDLpp_surface&&) noexcept;
+
+	SDL_Surface* GetHandle() const;
+
+	static SDLpp_surface LoadFromFile(const std::string&);
 
 private:
+	SDLpp_surface(SDL_Surface*);
+
 	SDL_Surface* m_surface;
 };
 
