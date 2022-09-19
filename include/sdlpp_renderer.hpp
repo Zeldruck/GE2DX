@@ -4,6 +4,7 @@
 #include <SDL.h>
 
 class SDLpp_window;
+class SDLpp_texture;
 
 class SDLpp_renderer
 {
@@ -17,6 +18,10 @@ public:
 	void Clear();
 	void SetDrawColor(Uint8, Uint8, Uint8, Uint8 = 255);
 	void Present();
+	void RenderCopy(const SDLpp_texture&);
+	void RenderCopy(const SDLpp_texture&, const SDL_Rect&);
+	void RenderCopy(const SDLpp_texture&, const SDL_Rect&, const SDL_Rect&);
+
 
 private:
 	SDL_Renderer* m_renderer;
