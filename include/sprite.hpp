@@ -18,11 +18,19 @@ public:
 	Sprite& operator=(const Sprite&) = delete;
 	Sprite& operator=(Sprite&&) = delete;
 
+	void Resize(int, int);
+
 	void Draw(SDLpp_renderer&, int, int);
+
+	int GetWidth() const;
+	int GetHeight() const;
+
+	void SetRect(SDL_Rect);
 
 private:
 	const SDLpp_texture& m_texture;
 	SDL_Rect m_rect;
+	int m_width, m_height;
 };
 
 #endif // !_SPRITE_HPP_
