@@ -5,6 +5,8 @@
 #include "sdlpp_texture.hpp"
 #include "sprite.hpp"
 
+#include "vector2.hpp"
+
 int main(int argc, char** argv)
 {
     SDLpp sdlpp;
@@ -42,10 +44,16 @@ int main(int argc, char** argv)
 
     bool isRunning = true;
 
+    /*Vector2<int> intVec(5, 10);
+    Vector2<float> floatVec(5.f, 10.f);
+
+    std::cout << intVec << std::endl;
+    std::cout << floatVec << std::endl;*/
+
     while (isRunning)
     {
         Uint64 now = SDL_GetPerformanceCounter();
-        float deltaTime = (float)(now - lastUpdate) / SDL_GetPerformanceFrequency();
+        float deltaTime = static_cast<float>(now - lastUpdate) / SDL_GetPerformanceFrequency();
         lastUpdate = now;
 
         SDL_Event event;
