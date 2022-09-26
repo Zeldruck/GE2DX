@@ -33,17 +33,17 @@ void SDLpp_renderer::Present()
 	SDL_RenderPresent(m_renderer);
 }
 
-void SDLpp_renderer::RenderCopy(const SDLpp_texture& _texture)
+void SDLpp_renderer::RenderCopy(std::shared_ptr<SDLpp_texture> _texture)
 {
-	SDL_RenderCopy(m_renderer, _texture.GetHandle(), nullptr, nullptr);
+	SDL_RenderCopy(m_renderer, _texture->GetHandle(), nullptr, nullptr);
 }
 
-void SDLpp_renderer::RenderCopy(const SDLpp_texture& _texture, const SDL_Rect& _dstRect)
+void SDLpp_renderer::RenderCopy(std::shared_ptr<SDLpp_texture> _texture, const SDL_Rect& _dstRect)
 {
-	SDL_RenderCopy(m_renderer, _texture.GetHandle(), nullptr, &_dstRect);
+	SDL_RenderCopy(m_renderer, _texture->GetHandle(), nullptr, &_dstRect);
 }
 
-void SDLpp_renderer::RenderCopy(const SDLpp_texture& _texture, const SDL_Rect& _srcRect, const SDL_Rect& _dstRect)
+void SDLpp_renderer::RenderCopy(std::shared_ptr<SDLpp_texture> _texture, const SDL_Rect& _srcRect, const SDL_Rect& _dstRect)
 {
-	SDL_RenderCopy(m_renderer, _texture.GetHandle(), &_srcRect, &_dstRect);
+	SDL_RenderCopy(m_renderer, _texture->GetHandle(), &_srcRect, &_dstRect);
 }

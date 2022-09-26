@@ -2,6 +2,7 @@
 #define _SDLPP_RENDERER_HPP_
 
 #include <SDL.h>
+#include <memory>
 
 class SDLpp_window;
 class SDLpp_texture;
@@ -18,9 +19,9 @@ public:
 	void Clear();
 	void SetDrawColor(Uint8, Uint8, Uint8, Uint8 = 255);
 	void Present();
-	void RenderCopy(const SDLpp_texture&);
-	void RenderCopy(const SDLpp_texture&, const SDL_Rect&);
-	void RenderCopy(const SDLpp_texture&, const SDL_Rect&, const SDL_Rect&);
+	void RenderCopy(std::shared_ptr<SDLpp_texture>);
+	void RenderCopy(std::shared_ptr<SDLpp_texture>, const SDL_Rect&);
+	void RenderCopy(std::shared_ptr<SDLpp_texture>, const SDL_Rect&, const SDL_Rect&);
 
 
 private:
