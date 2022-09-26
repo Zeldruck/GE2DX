@@ -2,13 +2,13 @@
 #include "sdlpp_renderer.hpp"
 #include "sdlpp_texture.hpp"
 
-Sprite::Sprite(const SDLpp_texture& _texture):
-	Sprite(_texture, _texture.GetRect())
+Sprite::Sprite(std::shared_ptr<SDLpp_texture> _texture):
+	Sprite(_texture, _texture->GetRect())
 {
 	
 }
 
-Sprite::Sprite(const SDLpp_texture& _texture, SDL_Rect& _rect):
+Sprite::Sprite(std::shared_ptr<SDLpp_texture> _texture, SDL_Rect& _rect):
 	m_texture(_texture), m_rect(_rect), m_width(_rect.w), m_height(_rect.h)
 {
 }
