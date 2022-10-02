@@ -21,16 +21,14 @@ public:
 	Transform& operator=(Transform&&) noexcept;
 
 
-	void SetPosition(const Vector2<float>);
-	void SetRotation(const float);
-	void SetScale(const Vector2<float>);
+	void SetPosition(const Vector2<float>&);
+	void SetRotation(const float&);
+	void SetScale(const Vector2<float>&);
 
-	void OriginPoint(const Vector2<float>);
+	void TransformPoint(const Vector2<float>&);
 
 
 public:
-	std::unique_ptr<Vector2<float>> origin;
-
 	std::unique_ptr<Vector2<float>> position;
 	float rotation;
 	std::unique_ptr<Vector2<float>> scale;
