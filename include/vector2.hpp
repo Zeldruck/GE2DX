@@ -3,14 +3,16 @@
 
 #include <iostream>
 
-class Vector2
+
+
+template<typename T>
+struct Vector2
 {
 public:
 	Vector2();
-	Vector2(float, float);
+	Vector2(Vector2&);
+	Vector2(T, T);
 	~Vector2();
-
-	Vector2& operator=(const Vector2&);
 
 	Vector2& operator+=(const Vector2&);
 	Vector2 operator+(const Vector2&);
@@ -18,14 +20,15 @@ public:
 	Vector2& operator-=(const Vector2&);
 	Vector2 operator-(const Vector2&);
 
-	Vector2& operator*=(float);
-	Vector2 operator*(float);
+	Vector2& operator*=(T);
+	Vector2 operator*(T);
+
+	Vector2& operator/=(T);
+	Vector2 operator/(T);
 	
+	friend std::ostream& operator<<(std::ostream&, const Vector2<T>&);
 
-	friend std::ostream& operator<<(std::ostream&, const Vector2&);
-
-private:
-	float x, y;
+	T x, y;
 };
 
 #endif // !_VECTOR2_HPP_
