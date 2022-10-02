@@ -2,6 +2,10 @@ add_rules("mode.debug", "mode.release")
 
 add_requires("libsdl", "libsdl_image")
 
+set_allowedarchs("windows|x64")
+set_warnings("allextra")
+
+
 target("GE2DX")
     set_kind("binary")
     add_headerfiles("include/*.hpp")
