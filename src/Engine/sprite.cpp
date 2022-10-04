@@ -1,6 +1,6 @@
-#include "sprite.hpp"
-#include "sdlpp_renderer.hpp"
-#include "sdlpp_texture.hpp"
+#include <Engine/sprite.hpp>
+#include <Engine/sdlpp_renderer.hpp>
+#include <Engine/sdlpp_texture.hpp>
 
 Sprite::Sprite(std::shared_ptr<SDLpp_texture> _texture):
 	Sprite(_texture, _texture->GetRect())

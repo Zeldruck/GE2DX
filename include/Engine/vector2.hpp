@@ -1,12 +1,11 @@
 #ifndef _VECTOR2_HPP_
 #define _VECTOR2_HPP_
 
+#include <Engine/Export.hpp>
 #include <iostream>
 
-
-
 template<typename T>
-struct Vector2
+struct GE2DX_ENGINE_API Vector2
 {
 public:
 	Vector2();

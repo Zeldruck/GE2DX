@@ -1,13 +1,14 @@
 #ifndef _SDLPP_RENDERER_HPP_
 #define _SDLPP_RENDERER_HPP_
 
+#include <Engine/Export.hpp>
 #include <SDL.h>
 #include <memory>
 
 class SDLpp_window;
 class SDLpp_texture;
 
-class SDLpp_renderer
+class GE2DX_ENGINE_API SDLpp_renderer
 {
 public:
 	SDLpp_renderer(SDLpp_window&, int = 0, Uint32 = 0);

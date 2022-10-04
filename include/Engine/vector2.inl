@@ -1,4 +1,4 @@
-#include "..\include\vector2.hpp"
+#include "vector2.hpp"
 
 template<typename T>
 Vector2<T>::Vector2()
@@ -8,7 +8,7 @@ Vector2<T>::Vector2()
 }
 
 template<typename T>
-Vector2<T>::Vector2(Vector2& _vec):
+Vector2<T>::Vector2(Vector2& _vec) :
 	x(_vec.x), y(_vec.y)
 {
 }

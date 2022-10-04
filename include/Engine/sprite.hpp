@@ -1,13 +1,14 @@
 #ifndef _SPRITE_HPP_
 #define _SPRITE_HPP_
 
+#include <Engine/Export.hpp>
 #include <SDL.h>
 #include <memory>
 
 class SDLpp_texture;
 class SDLpp_renderer;
 
-class Sprite
+class GE2DX_ENGINE_API Sprite
 {
 public:
 	Sprite(std::shared_ptr<SDLpp_texture>);

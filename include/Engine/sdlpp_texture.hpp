@@ -1,13 +1,14 @@
 #ifndef _SDLPP_TEXTURE_HPP_
 #define _SDLPP_TEXTURE_HPP_
 
+#include <Engine/Export.hpp>
 #include <SDL.h>
 #include <string>
 
 class SDLpp_renderer;
 class SDLpp_surface;
 
-class SDLpp_texture
+class GE2DX_ENGINE_API SDLpp_texture
 {
 public:
 	SDLpp_texture(SDLpp_texture&&) noexcept;

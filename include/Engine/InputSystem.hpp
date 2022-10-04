@@ -1,6 +1,7 @@
 #ifndef _INPUTSYSTEM_HPP_
 #define _INPUTSYSTEM_HPP_
 
+#include <Engine/Export.hpp>
 #include <memory>
 #include <iostream>
 #include <functional>
@@ -8,7 +9,7 @@
 
 class SEvent;
 
-class InputSystem
+class GE2DX_ENGINE_API InputSystem
 {
 public:
 	InputSystem();
