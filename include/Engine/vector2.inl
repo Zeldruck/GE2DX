@@ -1,93 +1,123 @@
 #include "vector2.hpp"
 
 template<typename T>
-Vector2<T>::Vector2()
-{
-	x = 0.f;
-	y = 0.f;
-}
-
-template<typename T>
-Vector2<T>::Vector2(Vector2& _vec) :
-	x(_vec.x), y(_vec.y)
+Vector2<T>::Vector2(T V) :
+	x(V),
+	y(V)
 {
 }
 
 template<typename T>
-Vector2<T>::Vector2(T _x, T _y)
+Vector2<T>::Vector2(T X, T Y) :
+	x(X),
+	y(Y)
 {
-	x = _x;
-	y = _y;
 }
 
 template<typename T>
-Vector2<T>::~Vector2()
+Vector2<T> Vector2<T>::operator+(const Vector2& vec) const
 {
+	return Vector2{ x + vec.x, y + vec.y };
 }
+
 template<typename T>
-Vector2<T>& Vector2<T>::operator+=(const Vector2& _vector2B)
+Vector2<T> Vector2<T>::operator-(const Vector2& vec) const
 {
-	x += _vector2B.x;
-	y += _vector2B.y;
+	return Vector2{ x - vec.x, y - vec.y };
+}
+
+template<typename T>
+Vector2<T> Vector2<T>::operator*(const Vector2& vec) const
+{
+	return Vector2{ x * vec.x, y * vec.y };
+}
+
+template<typename T>
+Vector2<T> Vector2<T>::operator*(T value) const
+{
+	return Vector2{ x * value, y * value };
+}
+
+template<typename T>
+Vector2<T> Vector2<T>::operator/(const Vector2& vec) const
+{
+	return Vector2{ x / vec.x, y / vec.y };
+}
+
+template<typename T>
+Vector2<T> Vector2<T>::operator/(T value) const
+{
+	return Vector2{ x / value, y / value };
+}
+
+template<typename T>
+Vector2<T>& Vector2<T>::operator+=(const Vector2& vec)
+{
+	x += vec.x;
+	y += vec.y;
 
 	return *this;
 }
 
 template<typename T>
-Vector2<T> Vector2<T>::operator+(const Vector2& _vector2B)
+Vector2<T>& Vector2<T>::operator-=(const Vector2& vec)
 {
-	return Vector2(x + _vector2B.x, y + _vector2B.y);
-}
-
-template<typename T>
-Vector2<T>& Vector2<T>::operator-=(const Vector2& _vector2B)
-{
-	x -= _vector2B.x;
-	y -= _vector2B.y;
+	x -= vec.x;
+	y -= vec.y;
 
 	return *this;
 }
 
 template<typename T>
-Vector2<T> Vector2<T>::operator-(const Vector2& _vector2B)
+Vector2<T>& Vector2<T>::operator*=(const Vector2& vec)
 {
-	return Vector2(x - _vector2B.x, y - _vector2B.y);
-}
-
-template<typename T>
-Vector2<T>& Vector2<T>::operator*=(T _value)
-{
-	x *= _value;
-	y *= _value;
+	x *= vec.x;
+	y *= vec.y;
 
 	return *this;
 }
 
 template<typename T>
-Vector2<T> Vector2<T>::operator*(T _value)
+Vector2<T>& Vector2<T>::operator*=(T value)
 {
-	return Vector2(x * _value, y * _value);
-}
-
-template<typename T>
-Vector2<T>& Vector2<T>::operator/=(T _value)
-{
-	x *= _value;
-	y *= _value;
+	x *= value;
+	y *= value;
 
 	return *this;
 }
 
 template<typename T>
-Vector2<T> Vector2<T>::operator/(T _value)
+Vector2<T>& Vector2<T>::operator/=(const Vector2& vec)
 {
-	return Vector2(x * _value, y * _value);
+	x /= vec.x;
+	y /= vec.y;
+
+	return *this;
 }
 
 template<typename T>
-std::ostream& operator<<(std::ostream& _os, const Vector2<T>& _vector)
+Vector2<T>& Vector2<T>::operator/=(T value)
 {
-	_os << "Vector2(" << _vector.x << ", " << _vector.y << ")";
+	x /= value;
+	y /= value;
 
-	return _os;
+	return *this;
+}
+
+template<typename T>
+Vector2<T> operator*(T value, const Vector2<T>& vec)
+{
+	return Vector2{ vec.x * value, vec.y * value };
+}
+
+template<typename T>
+Vector2<T> operator/(T value, const Vector2<T>& vec)
+{
+	return Vector2{ vec.x / value, vec.y / value };
+}
+
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const Vector2<T>& vec)
+{
+	return os << "Vector2(" << vec.x << ", " << vec.y << ")";
 }

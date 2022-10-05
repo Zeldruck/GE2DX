@@ -2,36 +2,51 @@
 #define _TRANSFORM_HPP_
 
 #include <Engine/Export.hpp>
-#include <memory>
-
-template<typename T>
-struct Vector2;
+#include <Engine/vector2.hpp>
+#include <vector>
 
 class GE2DX_ENGINE_API Transform
 {
 public:
 	Transform();
-	
-	Transform(Transform&&) = default;
-	Transform(const Transform&) = default;
+	Transform(const Transform& transform);
+	Transform(Transform&&) noexcept;
 	~Transform();
 
-	Transform& operator=(const Transform&) = default;
-	Transform& operator=(Transform&&) = default;
+	Vector2f GetGlobalPosition() const;
+	float GetGlobalRotation() const;
+	Vector2f GetGlobalScale() const;
 
+	Transform* GetParent() const;
+	const Vector2f& GetPosition() const;
+	float GetRotation() const;
+	const Vector2f& GetScale() const;
 
-	void SetPosition(const Vector2<float>&);
-	void SetRotation(float);
-	void SetScale(const Vector2<float>&);
+	void Rotate(float rotation);
+	void Scale(float scale);
+	void Scale(const Vector2f& scale);
 
-	void TransformPoint(const Vector2<float>&);
+	void SetParent(Transform* parent);
+	void SetPosition(const Vector2f& position);
+	void SetRotation(float rotation);
+	void SetScale(const Vector2f& scale);
 
-public:
-	Vector2<float> m_position;
-	float m_rotation;
-	Vector2<float> m_scale;
+	void Translate(const Vector2f& translation);
+
+	Vector2f TransformPoint(Vector2f position) const;
+
+	Transform& operator=(const Transform&);
+	Transform& operator=(Transform&&) noexcept;
 
 private:
+	void AttachChild(Transform* child);
+	void DetachChild(Transform* child);
+
+	std::vector<Transform*> m_children;
+	Transform* m_parent;
+	Vector2f m_position;
+	float m_rotation;
+	Vector2f m_scale;
 
 };
 

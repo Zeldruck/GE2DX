@@ -12,20 +12,29 @@ class SDLpp_renderer;
 class GE2DX_ENGINE_API ResourceManager
 {
 public:
-	ResourceManager() = default;
+	ResourceManager(SDLpp_renderer& renderer);
 	ResourceManager(const ResourceManager&) = delete;
 	ResourceManager(ResourceManager&&) = delete;
-	~ResourceManager() = default;
+	~ResourceManager();
 
 	ResourceManager& operator=(const ResourceManager&) = delete;
 	ResourceManager& operator=(ResourceManager&&) = delete;
 
-	std::shared_ptr<SDLpp_texture> GetTexture(SDLpp_renderer&, const std::string&);
+	static ResourceManager& Instance();
+
+	void Clear();
+
+	const std::shared_ptr<SDLpp_texture>& GetTexture(const std::string& texturePath);
+
 	void Purge();
 
 private:
 	std::shared_ptr<SDLpp_texture> m_missingTexture;
 	std::unordered_map<std::string /*texturePath*/, std::shared_ptr<SDLpp_texture>> m_textures;
+
+	SDLpp_renderer& m_renderer;
+
+	static ResourceManager* s_instance;
 
 };
 

@@ -1,33 +1,45 @@
 #ifndef _VECTOR2_HPP_
 #define _VECTOR2_HPP_
 
-#include <Engine/Export.hpp>
 #include <iostream>
 
+// Pas de macro d'export pour les templates (leur code n'étant pas compilé dans la dll)
 template<typename T>
-struct GE2DX_ENGINE_API Vector2
+struct Vector2
 {
-public:
-	Vector2();
-	Vector2(Vector2&);
-	Vector2(T, T);
-	~Vector2();
+	Vector2() = default; // valeur non-initialisée
+	explicit Vector2(T V); //< explicit permet d'éviter les conversions implicites, sans ça on aurait pu écrire Vector2 x = 42, ou passer un entier à une fonction attendant un Vector2
+	Vector2(T X, T Y);
 
-	Vector2& operator+=(const Vector2&);
-	Vector2 operator+(const Vector2&);
+	Vector2 operator+(const Vector2& vec) const;
+	Vector2 operator-(const Vector2& vec) const;
+	Vector2 operator*(const Vector2& vec) const;
+	Vector2 operator*(T value) const;
+	Vector2 operator/(const Vector2& vec) const;
+	Vector2 operator/(T value) const;
 
-	Vector2& operator-=(const Vector2&);
-	Vector2 operator-(const Vector2&);
-
-	Vector2& operator*=(T);
-	Vector2 operator*(T);
-
-	Vector2& operator/=(T);
-	Vector2 operator/(T);
-	
-	friend std::ostream& operator<<(std::ostream&, const Vector2<T>&);
+	Vector2& operator+=(const Vector2& vec);
+	Vector2& operator-=(const Vector2& vec);
+	Vector2& operator*=(const Vector2& vec);
+	Vector2& operator*=(T value);
+	Vector2& operator/=(const Vector2& vec);
+	Vector2& operator/=(T value);
 
 	T x, y;
 };
+
+template<typename T> Vector2<T> operator*(T value, const Vector2<T>& vec);
+template<typename T> Vector2<T> operator/(T value, const Vector2<T>& vec);
+
+// Opérateur de flux, permet d'écrire un Vector2 directement dans std::cout (ou autre flux de sortie)
+template<typename T> std::ostream& operator<<(std::ostream& os, const Vector2<T>& vec);
+
+// On peut utiliser using pour faire un alias plus facile à écrire
+using Vector2f = Vector2<float>;
+using Vector2i = Vector2<int>;
+
+// Il est relativement courant de séparer le code template dans un fichier annexe, pour clarifier les headers
+// cela peut se faire en incluant un autre fichier
+#include <Engine/Vector2.inl>
 
 #endif // !_VECTOR2_HPP_

@@ -1,4 +1,4 @@
-﻿#include "..\include\sdlpp_window.hpp"
+﻿#include <Engine/sdlpp_window.hpp>
 
 SDLpp_window::SDLpp_window(const std::string& _title, int _width, int _height, Uint32 _flags):
 SDLpp_window(_title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, _width, _height, _flags)

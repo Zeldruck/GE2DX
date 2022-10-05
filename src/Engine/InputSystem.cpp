@@ -1,73 +1,91 @@
-#include "..\include\InputSystem.hpp"
+#include <Engine/InputSystem.hpp>
 
-std::shared_ptr<InputSystem> InputSystem::instance = nullptr;
-
-InputSystem::InputSystem()
+void InputSystem::BindKeyPressed(SDL_KeyCode keyCode, std::string action)
 {
+	m_keyToAction[keyCode] = std::move(action);
 }
 
-InputSystem::~InputSystem()
+void InputSystem::BindMouseButtonPressed(MouseButton button, std::string action)
 {
+	// Plutôt que de traduire depuis notre enum vers les defines de la SDL à chaque événement
+	// on peut le faire une seule fois au binding (plus efficace)
+	int mouseButton;
+	switch (button)
+	{
+	case MouseButton::Left:   mouseButton = SDL_BUTTON_LEFT;   break;
+	case MouseButton::Right:  mouseButton = SDL_BUTTON_RIGHT;  break;
+	case MouseButton::Middle: mouseButton = SDL_BUTTON_MIDDLE; break;
+	case MouseButton::X1:     mouseButton = SDL_BUTTON_X1;     break;
+	case MouseButton::X2:     mouseButton = SDL_BUTTON_X2;     break;
+	default:
+		return; //< ne devrait pas arriver
+	}
+
+	m_mouseButtonToAction[mouseButton] = std::move(action);
 }
 
-std::shared_ptr<InputSystem> InputSystem::Instance()
+void InputSystem::BindControllerButton(SDL_GameControllerButton button, std::string action)
 {
-	if (instance == nullptr)
-	{
-		instance = std::make_shared<InputSystem>();
-	}
-
-	return instance;
+	m_controllerButtonToAction[button] = std::move(action);
 }
 
-void InputSystem::BindKeyPressed(int _key, const std::string& _name)
+void InputSystem::ClearBindings()
 {
-	std::map<std::string, std::shared_ptr<SEvent>>::iterator it;
-
-	it = actions.find(_name);
-
-	if (it == actions.end())
-	{
-		std::shared_ptr<SEvent> un = std::make_shared<SEvent>();
-		un->name = _name;
-		un->keyButton = _key;
-
-		actions[_name] = un;
-	}
-	else
-	{
-		actions[_name]->keyButton = _key;
-	}
+	m_controllerButtonToAction.clear();
+	m_mouseButtonToAction.clear();
+	m_keyToAction.clear();
 }
 
-void InputSystem::BindMouseButton(int _mouseButton, const std::string& _name)
+void InputSystem::HandleEvent(const SDL_Event& event)
 {
-	std::map<std::string, std::shared_ptr<SEvent>>::iterator it;
-
-	it = actions.find(_name);
-
-	if (it == actions.end())
+	switch (event.type)
 	{
-		std::shared_ptr<SEvent> un = std::make_shared<SEvent>();
-		un->name = _name;
-		un->mouseButton = _mouseButton;
+	case SDL_CONTROLLERBUTTONDOWN:
+	{
+		auto it = m_controllerButtonToAction.find(static_cast<SDL_GameControllerButton>(event.cbutton.button));
+		if (it != m_controllerButtonToAction.end())
+			TriggerAction(it->second);
 
-		actions[_name] = un;
+		break;
 	}
-	else
+
+	case SDL_KEYDOWN:
 	{
-		actions[_name]->mouseButton = _mouseButton;
+		auto it = m_keyToAction.find(event.key.keysym.sym);
+		if (it != m_keyToAction.end())
+			TriggerAction(it->second);
+
+		break;
+	}
+
+	case SDL_MOUSEBUTTONDOWN:
+	{
+		auto it = m_mouseButtonToAction.find(event.button.button);
+		if (it != m_mouseButtonToAction.end())
+			TriggerAction(it->second);
+
+		break;
+	}
 	}
 }
 
-void InputSystem::OnAction(const std::string& _name, std::function<void()> _func)
+void InputSystem::OnAction(std::string action, std::function<void()> func)
 {
-	std::map<std::string, std::shared_ptr<SEvent>>::iterator it;
+	m_actionToFunc[std::move(action)] = std::move(func);
+}
 
-	it = actions.find(_name);
+InputSystem& InputSystem::Instance()
+{
+	static InputSystem InputSystem;
+	return InputSystem;
+}
 
-	if (it != actions.end())
+void InputSystem::TriggerAction(const std::string& action)
+{
+	auto it = m_actionToFunc.find(action);
+	if (it != m_actionToFunc.end())
 	{
-		actions[_name]->action = _func;
+		std::function<void()>& func = it->second;
+		func();
 	}
 }

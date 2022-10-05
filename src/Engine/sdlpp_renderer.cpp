@@ -1,6 +1,6 @@
-﻿#include "sdlpp_renderer.hpp"
-#include "sdlpp_window.hpp"
-#include "sdlpp_texture.hpp"
+﻿#include <Engine/sdlpp_renderer.hpp>
+#include <Engine/sdlpp_window.hpp>
+#include <Engine/sdlpp_texture.hpp>
 
 SDLpp_renderer::SDLpp_renderer(SDLpp_window& _windowpp, int _index, Uint32 _flags)
 {

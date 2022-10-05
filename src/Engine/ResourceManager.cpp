@@ -3,23 +3,37 @@
 #include <Engine/sdlpp_renderer.hpp>
 #include <Engine/sdlpp_surface.hpp>
 
-ResourceManager::ResourceManager()
+#include <stdexcept>
+
+ResourceManager::ResourceManager(SDLpp_renderer& renderer) :
+	m_renderer(renderer)
 {
+	if (s_instance != nullptr)
+		throw std::runtime_error("only one ResourceManager can be created");
+
+	s_instance = this;
 }
 
 ResourceManager::~ResourceManager()
 {
+	s_instance = nullptr;
 }
 
-std::shared_ptr<SDLpp_texture> ResourceManager::GetTexture(SDLpp_renderer& _renderer, const std::string& _path)
+void ResourceManager::Clear()
 {
-	auto it = m_textures.find(_path);
+	m_missingTexture.reset();
+	m_textures.clear();
+}
 
+const std::shared_ptr<SDLpp_texture>& ResourceManager::GetTexture(const std::string& texturePath)
+{
+	// Avons-nous déjà cette texture en stock ?
+	auto it = m_textures.find(texturePath);
 	if (it != m_textures.end())
-		return it->second;
+		return it->second; // Oui, on peut la renvoyer
 
 	// Non, essayons de la charger
-	SDLpp_surface surface = SDLpp_surface::LoadFromFile(_path);
+	SDLpp_surface surface = SDLpp_surface::LoadFromFile(texturePath);
 	if (!surface.IsValid())
 	{
 		// On a pas pu charger la surface, utilisons une texture "manquante"
@@ -32,19 +46,19 @@ std::shared_ptr<SDLpp_texture> ResourceManager::GetTexture(SDLpp_renderer& _rend
 			surface.FillRect(SDL_Rect{ 0, 16, 16, 16 }, 0, 0, 0, 255);
 			surface.FillRect(SDL_Rect{ 16, 16, 16, 16 }, 255, 0, 255, 255);
 
-			m_missingTexture = std::make_shared<SDLpp_texture>(SDLpp_texture::LoadFromSurface(_renderer, surface));
+			m_missingTexture = std::make_shared<SDLpp_texture>(SDLpp_texture::LoadFromSurface(m_renderer, surface));
 		}
 
 		// On enregistre cette texture comme une texture manquante (pour ne pas essayer de la charger à chaque fois)
-		m_textures.emplace(_path, m_missingTexture);
+		m_textures.emplace(texturePath, m_missingTexture);
 		return m_missingTexture;
 	}
 
 	// On a réussi à charger la surface, on la transforme en texture et on l'enregistre
-	std::shared_ptr<SDLpp_texture> texture = std::make_shared<SDLpp_texture>(SDLpp_texture::LoadFromSurface(_renderer, surface));
+	std::shared_ptr<SDLpp_texture> texture = std::make_shared<SDLpp_texture>(SDLpp_texture::LoadFromSurface(m_renderer, surface));
 
 	// .emplace et .insert renvoient un std::pair<iterator, bool>, le booléen indiquant si la texture a été insérée dans la map (ce qu'on sait déjà ici)
-	it = m_textures.emplace(_path, std::move(texture)).first;
+	it = m_textures.emplace(texturePath, std::move(texture)).first;
 
 	// Attention, on ne peut pas renvoyer texture directement (même sans std::move) car on renvoie une référence constante
 	// qui serait alors une référence constante sur une variable temporaire détruite à la fin de la fonction (texture)
@@ -58,7 +72,7 @@ void ResourceManager::Purge()
 	for (auto it = m_textures.begin(); it != m_textures.end(); ) //< pas d'incrémentation de it
 	{
 		// On vérifie le compteur pour vérifier si la texture est utilisée ailleurs ou non
-		if (it->second.use_count() > 1)
+		if (!it->second.unique())
 		{
 			++it; // la texture est utilisée, on la garde et on passe à la suivante
 		}
@@ -70,3 +84,13 @@ void ResourceManager::Purge()
 		}
 	}
 }
+
+ResourceManager& ResourceManager::Instance()
+{
+	if (s_instance == nullptr)
+		throw std::runtime_error("ResourceManager hasn't been instantied");
+
+	return *s_instance;
+}
+
+ResourceManager* ResourceManager::s_instance = nullptr;
