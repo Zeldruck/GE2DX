@@ -7,6 +7,7 @@
 
 class SDLpp_texture;
 class SDLpp_renderer;
+class Transform;
 
 class GE2DX_ENGINE_API Sprite
 {
@@ -22,7 +23,7 @@ public:
 
 	void Resize(int, int);
 
-	void Draw(SDLpp_renderer&, int, int);
+	void Draw(SDLpp_renderer&, const Transform&);
 
 	int GetWidth() const;
 	int GetHeight() const;

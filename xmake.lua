@@ -1,6 +1,9 @@
 add_rules("mode.debug", "mode.release")
 
 add_requires("libsdl", "libsdl_image")
+add_requires("fmt")
+add_requires("imgui", { configs = { sdl2 = true }})
+add_requires("entt")
 
 set_allowedarchs("windows|x64")
 set_warnings("allextra")
@@ -8,18 +11,21 @@ set_warnings("allextra")
 set_rundir("bin") -- Le dossier courant lors de l'exécution des binaires (depuis VS) - c'est depuis ce dossier que les chemins commencent
 set_targetdir("bin/$(plat)_$(arch)_$(mode)") -- Le dossier de sortie des binaires, les $(X) sont remplacés par les valeurs existantes (plat = windows, arch = x64 et mode = debug)
 
+set_languages("c++17")
+
 target("GE2DX_Engine")
     set_kind("shared")
     add_defines("GE2DX_ENGINE_BUILD")
     add_headerfiles("include/Engine/*.h", "include/Engine/*.hpp", "include/Engine/*.inl")
     add_includedirs("include", { public = true })
     add_files("src/Engine/**.cpp")
-    add_packages("libsdl", "libsdl_image", { public = true })
+    add_packages("libsdl", "libsdl_image", "fmt", "entt", { public = true })
 
 target("A4Game")
     add_deps("GE2DX_Engine")
     add_headerfiles("include/Game/*.h", "include/Game/*.hpp")
     add_files("src/Game/**.cpp")
+    add_packages("imgui")
 
 --
 -- If you want to known more usage about xmake, please see https://xmake.io
