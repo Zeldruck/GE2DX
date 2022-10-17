@@ -1,10 +1,11 @@
-﻿#include "sdlpp_texture.hpp"
-#include "sdlpp_renderer.hpp"
-#include "sdlpp_surface.hpp"
+﻿#include <Engine/sdlpp_texture.hpp>
+#include <Engine/sdlpp_renderer.hpp>
+#include <Engine/sdlpp_surface.hpp>
 
 SDLpp_texture::SDLpp_texture(SDLpp_texture&& _texturepp) noexcept
 {
-	std::swap(m_texture, _texturepp.m_texture);
+	m_texture = _texturepp.m_texture;
+	_texturepp.m_texture = nullptr;
 }
 
 SDLpp_texture::~SDLpp_texture()

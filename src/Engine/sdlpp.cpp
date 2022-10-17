@@ -1,4 +1,4 @@
-#include "..\include\sdlpp.hpp"
+#include <Engine/sdlpp.hpp>
 
 SDLpp::SDLpp(Uint32 _flags)
 {

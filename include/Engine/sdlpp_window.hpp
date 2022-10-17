@@ -1,10 +1,11 @@
 #ifndef _SDLPP_WINDOW_HPP_
 #define _SDLPP_WINDOW_HPP_
 
+#include <Engine/Export.hpp>
 #include <string>
 #include <SDL.h>
 
-class SDLpp_window
+class GE2DX_ENGINE_API SDLpp_window
 {
 public:
 	SDLpp_window(const std::string&, int, int, Uint32 = 0);
