@@ -14,41 +14,39 @@
 #include <imgui_impl_sdlrenderer.h>
 
 #include <entt/entt.hpp>
+#include <Engine/Components/VelocityComponent.hpp>
 
-struct Position
-{
-    Vector2f pos;
-};
-
-struct Velocity
-{
-    Vector2f vel;
-};
+void RenderSystem(entt::registry&, SDLpp_renderer&);
+void VelocitySystem(entt::registry&, float);
 
 int main(int argc, char** argv)
 {
-    /*entt::registry registry;
-
-    entt::entity entity = registry.create();
-    Position& entityPos = registry.emplace<Position>(entity);
-    entityPos.pos = Vector2f(0.5f, 0.f);
-    Velocity& entityVel = registry.emplace<Velocity>(entity);
-
-    auto view = registry.view<Position, Velocity>();
-
-    for (entt::entity e : view)
-    {
-
-    }
-
-    return 0;*/
-
     SDLpp sdlpp;
 
     SDLpp_window windowpp("GE2DX", 1280, 720);
     SDLpp_renderer rendererpp(windowpp);
 
     ResourceManager resourceManager(rendererpp);
+
+    entt::registry registry;
+
+    /* BG */
+    entt::entity bg = registry.create();
+    Transform& bgTransform = registry.emplace<Transform>(bg);
+    Sprite& bgSprite = registry.emplace<Sprite>(bg);
+    bgSprite.SetTexture(ResourceManager::Instance().GetTexture("assets/test.jpg"));
+
+    /* Other */
+    entt::entity other = registry.create();
+    Transform& otherTransform = registry.emplace<Transform>(other);
+
+    Sprite& otherSprite = registry.emplace<Sprite>(other);
+    otherSprite.SetTexture(ResourceManager::Instance().GetTexture("assets/sprsh.png"));
+    otherSprite.SetRect(SDL_Rect{ 0, 0, 64, 64 });
+    otherSprite.Resize(256, 256);
+
+    VelocityComponent& otherVelocity = registry.emplace<VelocityComponent>(other);
+    otherVelocity.velocity = Vector2f(1.f, 0.f);
 
 
     // Setup imgui
@@ -70,16 +68,6 @@ int main(int argc, char** argv)
         std::cout << "Hello world" << std::endl;
     });
 
-    Sprite bg(ResourceManager::Instance().GetTexture("assets/test.jpg"));
-    bg.Resize(1280, 720);
-
-    Sprite sprsh(ResourceManager::Instance().GetTexture("assets/sprsh.png"));
-    sprsh.SetRect(SDL_Rect{ 0, 0, 64, 64});
-    sprsh.Resize(256, 256);
-
-    Transform transform;
-    Transform bgTransform;
-    
 
     Uint64 lastUpdate = SDL_GetPerformanceCounter();
 
@@ -95,7 +83,7 @@ int main(int argc, char** argv)
         float deltaTime = static_cast<float>(now - lastUpdate) / SDL_GetPerformanceFrequency();
         lastUpdate = now;
 
-        if (duration > 0.f)
+        /*if (duration > 0.f)
             duration -= deltaTime;
         else
         {
@@ -110,7 +98,7 @@ int main(int argc, char** argv)
             sprsh.SetRect(SDL_Rect{ index * 64, 0, 64, 64 });
         }
 
-        transform.Rotate(0.5f * deltaTime);
+        transform.Rotate(0.5f * deltaTime);*/
 
         SDL_Event event;
 
@@ -127,6 +115,8 @@ int main(int argc, char** argv)
             InputSystem::Instance().HandleEvent(event);
         }
 
+        VelocitySystem(registry, deltaTime);
+
         // Start the Dear ImGui frame
         ImGui_ImplSDLRenderer_NewFrame();
         ImGui_ImplSDL2_NewFrame();
@@ -137,8 +127,10 @@ int main(int argc, char** argv)
 
         ImGui::LabelText("Hello", "zzz");
 
-        bg.Draw(rendererpp, bgTransform);
-        sprsh.Draw(rendererpp, transform);
+        /*bg.Draw(rendererpp, bgTransform);
+        sprsh.Draw(rendererpp, transform);*/
+
+        RenderSystem(registry, rendererpp);
 
         ImGui::Render();
         ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
@@ -152,4 +144,28 @@ int main(int argc, char** argv)
     ImGui::DestroyContext();
 
     return 0;
+}
+
+void RenderSystem(entt::registry& _registry, SDLpp_renderer& _renderer)
+{
+    auto view = _registry.view<Transform, Sprite>();
+    for (entt::entity entity : view)
+    {
+        auto& entityTransform = view.get<Transform>(entity);
+        auto& entitySprite = view.get<Sprite>(entity);
+
+        entitySprite.Draw(_renderer, entityTransform);
+    }
+}
+
+void VelocitySystem(entt::registry& _registry, float _deltaTime)
+{
+    auto view = _registry.view<Transform, VelocityComponent>();
+    for (entt::entity entity : view)
+    {
+        auto& entityTransform = view.get<Transform>(entity);
+        auto& entityVelocity = view.get<VelocityComponent>(entity);
+
+        entityTransform.Translate(entityVelocity.velocity * _deltaTime);
+    }
 }

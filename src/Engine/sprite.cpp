@@ -3,6 +3,11 @@
 #include <Engine/sdlpp_texture.hpp>
 #include "Engine/transform.hpp"
 
+Sprite::Sprite():
+m_texture(nullptr), m_rect(), m_width(0), m_height(0)
+{
+}
+
 Sprite::Sprite(std::shared_ptr<const SDLpp_texture> _texture):
 	Sprite(std::move(_texture), _texture->GetRect())
 {
@@ -22,6 +27,9 @@ void Sprite::Resize(int _w, int _h)
 
 void Sprite::Draw(SDLpp_renderer& _renderer, const Transform& _transform)
 {
+	if (m_texture == nullptr)
+		return;
+
 	Vector2f topLeftCorner = _transform.TransformPoint(Vector2f(0.f, 0.f));
 	Vector2f topRightCorner = _transform.TransformPoint(Vector2f(m_width, 0.f));
 	Vector2f bottomLeftCorner = _transform.TransformPoint(Vector2f(0.f, m_height));
@@ -62,6 +70,14 @@ int Sprite::GetWidth() const
 int Sprite::GetHeight() const
 {
 	return m_height;
+}
+
+void Sprite::SetTexture(std::shared_ptr<const SDLpp_texture> _texture)
+{
+	m_texture = std::move(_texture);
+	m_rect = _texture->GetRect();
+	m_width = m_rect.w;
+	m_height = m_rect.h;
 }
 
 void Sprite::SetRect(SDL_Rect _rect)
