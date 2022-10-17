@@ -12,8 +12,8 @@ class Transform;
 class GE2DX_ENGINE_API Sprite
 {
 public:
-	Sprite(std::shared_ptr<SDLpp_texture>);
-	Sprite(std::shared_ptr<SDLpp_texture>, SDL_Rect&);
+	Sprite(std::shared_ptr<const SDLpp_texture>);
+	Sprite(std::shared_ptr<const SDLpp_texture>, const SDL_Rect&);
 	Sprite(const Sprite&) = default;
 	Sprite(Sprite&&) = default;
 	~Sprite() = default;
@@ -31,7 +31,7 @@ public:
 	void SetRect(SDL_Rect);
 
 private:
-	std::shared_ptr<SDLpp_texture> m_texture;
+	std::shared_ptr<const SDLpp_texture> m_texture;
 	SDL_Rect m_rect;
 	int m_width, m_height;
 };

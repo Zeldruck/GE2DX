@@ -3,14 +3,14 @@
 #include <Engine/sdlpp_texture.hpp>
 #include "Engine/transform.hpp"
 
-Sprite::Sprite(std::shared_ptr<SDLpp_texture> _texture):
-	Sprite(_texture, _texture->GetRect())
+Sprite::Sprite(std::shared_ptr<const SDLpp_texture> _texture):
+	Sprite(std::move(_texture), _texture->GetRect())
 {
 	
 }
 
-Sprite::Sprite(std::shared_ptr<SDLpp_texture> _texture, SDL_Rect& _rect):
-	m_texture(_texture), m_rect(_rect), m_width(_rect.w), m_height(_rect.h)
+Sprite::Sprite(std::shared_ptr<const SDLpp_texture> _texture, const SDL_Rect& _rect):
+	m_texture(std::move(_texture)), m_rect(_rect), m_width(_rect.w), m_height(_rect.h)
 {
 }
 

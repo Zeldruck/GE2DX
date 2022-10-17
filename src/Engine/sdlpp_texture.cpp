@@ -4,7 +4,8 @@
 
 SDLpp_texture::SDLpp_texture(SDLpp_texture&& _texturepp) noexcept
 {
-	std::swap(m_texture, _texturepp.m_texture);
+	m_texture = _texturepp.m_texture;
+	_texturepp.m_texture = nullptr;
 }
 
 SDLpp_texture::~SDLpp_texture()

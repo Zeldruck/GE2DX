@@ -27,7 +27,7 @@ struct Velocity
 
 int main(int argc, char** argv)
 {
-    entt::registry registry;
+    /*entt::registry registry;
 
     entt::entity entity = registry.create();
     Position& entityPos = registry.emplace<Position>(entity);
@@ -41,7 +41,7 @@ int main(int argc, char** argv)
 
     }
 
-    return 0;
+    return 0;*/
 
     SDLpp sdlpp;
 
@@ -78,6 +78,7 @@ int main(int argc, char** argv)
     sprsh.Resize(256, 256);
 
     Transform transform;
+    Transform bgTransform;
     
 
     Uint64 lastUpdate = SDL_GetPerformanceCounter();
@@ -136,7 +137,7 @@ int main(int argc, char** argv)
 
         ImGui::LabelText("Hello", "zzz");
 
-        //bg.Draw(rendererpp, 0, 0);
+        bg.Draw(rendererpp, bgTransform);
         sprsh.Draw(rendererpp, transform);
 
         ImGui::Render();
