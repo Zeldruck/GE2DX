@@ -3,6 +3,7 @@
 #include <Engine/AnimationSystem.hpp>
 #include <Engine/CameraComponent.hpp>
 #include <Engine/GraphicsComponent.hpp>
+#include <Engine/Components/VelocityComponent.hpp>
 #include <Engine/InputSystem.hpp>
 #include <Engine/Model.hpp>
 #include <Engine/RenderSystem.hpp>
@@ -42,6 +43,7 @@ int main(int argc, char** argv)
     SDLpp_renderer rendererpp(windowpp);
 
     ResourceManager resourceManager(rendererpp);
+    InputSystem inputManager;
 
     SDLpp_imgui imgui(windowpp, rendererpp);
 
@@ -64,8 +66,8 @@ int main(int argc, char** argv)
 
     std::shared_ptr<Spritesheet> spriteSheet = std::make_shared<Spritesheet>();
     spriteSheet->AddAnimation("idle", 5, 0.1f, Vector2i{ 0, 0 }, Vector2i{ 32, 32 });
-    spriteSheet->AddAnimation("run", 5, 0.1f, Vector2i{ 0, 32 }, Vector2i{ 32, 32 });
-    spriteSheet->AddAnimation("jump", 5, 0.1f, Vector2i{ 0, 64 }, Vector2i{ 32, 32 });
+    spriteSheet->AddAnimation("run", 8, 0.1f, Vector2i{ 0, 32 }, Vector2i{ 32, 32 });
+    spriteSheet->AddAnimation("jump", 4, 0.1f, Vector2i{ 0, 64 }, Vector2i{ 32, 32 });
 
 
     entt::registry registry;
@@ -88,6 +90,16 @@ int main(int argc, char** argv)
     float speedTime = 0.1f;
     float duration = speedTime;
     int index = 0;
+
+    InputSystem::Instance().BindKeyPressed(SDL_KeyCode::SDLK_r, "PlayRun");
+
+    InputSystem::Instance().OnAction("PlayRun", [&](bool pressed)
+        {
+            if (pressed)
+                registry.get<SpritesheetComponent>(runner).PlayAnimation("run");
+            else
+                registry.get<SpritesheetComponent>(runner).PlayAnimation("idle");
+        });
 
     bool isRunning = true;
 
@@ -129,8 +141,7 @@ int main(int argc, char** argv)
 
         imgui.Render();
 
-
-        RenderSystem(registry, rendererpp);
+        RenderSystem(rendererpp, registry);
 
         ImGui::Render();
 
@@ -161,6 +172,7 @@ void EntityInspector(const char* windowName, entt::registry& registry, entt::ent
 
     if (ImGui::Button("Reset"))
     {
+        transform.SetScale({ 1.f, 1.f });
         transform.SetRotation(0.f);
         transform.SetPosition(Vector2f(0.f, 0.f));
     }

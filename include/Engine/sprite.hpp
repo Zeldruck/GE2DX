@@ -25,7 +25,7 @@ public:
 
 	void Resize(int, int);
 
-	void Draw(SDLppRenderer& renderer, const Transform& cameraTransform, const Transform& transform) override;
+	void Draw(SDLpp_renderer& renderer, const Transform& cameraTransform, const Transform& transform) override;
 
 	int GetWidth() const;
 	int GetHeight() const;

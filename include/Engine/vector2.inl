@@ -19,7 +19,7 @@ Vector2<T>::Vector2(T X, T Y) :
 template<typename T>
 Vector2<T> Vector2<T>::Rotate(const Vector2& vec, float degrees)
 {
-	float radRotation = Deg2Rad * degrees;
+	float radRotation = Deg2Rad(degrees);
 	float s = std::sin(radRotation);
 	float c = std::cos(radRotation);
 

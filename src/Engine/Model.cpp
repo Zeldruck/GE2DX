@@ -6,6 +6,7 @@
 #include <fmt/color.h>
 #include <fmt/core.h>
 #include <fmt/std.h>
+#include <lz4.h>
 #include <nlohmann/json.hpp>
 #include <cassert>
 #include <fstream>

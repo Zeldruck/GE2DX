@@ -52,7 +52,7 @@ private:
 	static Model LoadFromFileCompressed(const std::filesystem::path& filepath);
 	static Model LoadFromFileBinary(const std::filesystem::path& filepath);
 
-	std::shared_ptr<const SDLppTexture> m_texture;
+	std::shared_ptr<const SDLpp_texture> m_texture;
 	std::vector<ModelVertex> m_vertices;
 	std::vector<SDL_Vertex> m_sdlVertices;
 	std::vector<int> m_indices;
