@@ -1,18 +1,20 @@
-#include <Engine/VelocitySystem.hpp>
+#include <Engine/PhysicsSystem.hpp>
+#include <Engine/RigidBodyComponent.hpp>
 #include <Engine/Components/VelocityComponent.hpp>
 #include <Engine/transform.hpp>
 #include <entt/entt.hpp>
 
-VelocitySystem::VelocitySystem(entt::registry& registry) :
+PhysicsSystem::PhysicsSystem(entt::registry& registry):
 	m_registry(registry)
 {
 }
 
-void VelocitySystem::Update(float deltaTime)
+void PhysicsSystem::Update(float deltaTime)
 {
-	auto view = m_registry.view<Transform, VelocityComponent>();
+	auto view = m_registry.view<Transform, VelocityComponent, RigidBodyComponent>();
 	for (entt::entity entity : view)
 	{
+		RigidBodyComponent& entityRigidBody = view.get<RigidBodyComponent>(entity);
 		Transform& entityTransform = view.get<Transform>(entity);
 		VelocityComponent& entityVelocity = view.get<VelocityComponent>(entity);
 

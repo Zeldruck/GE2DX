@@ -2,11 +2,8 @@
 
 #include <Engine/Export.hpp>
 #include <Engine/SpriteSheet.hpp>
-#include <Engine/vector2.hpp>
 #include <memory>
-#include <optional>
 #include <unordered_map>
-#include <vector>
 
 class AnimationSystem;
 class Sprite;
