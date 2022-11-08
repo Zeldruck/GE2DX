@@ -3,19 +3,17 @@
 #include <Engine/sdlpp_texture.hpp>
 #include "Engine/transform.hpp"
 
-Sprite::Sprite():
-m_texture(nullptr), m_rect(), m_width(0), m_height(0)
+Sprite::Sprite(std::shared_ptr<const SDLpp_texture> texture) :
+	Sprite(std::move(texture), texture->GetRect())
 {
 }
 
-Sprite::Sprite(std::shared_ptr<const SDLpp_texture> _texture):
-	Sprite(std::move(_texture), _texture->GetRect())
-{
-	
-}
-
-Sprite::Sprite(std::shared_ptr<const SDLpp_texture> _texture, const SDL_Rect& _rect):
-	m_texture(std::move(_texture)), m_rect(_rect), m_width(_rect.w), m_height(_rect.h)
+Sprite::Sprite(std::shared_ptr<const SDLpp_texture> texture, const SDL_Rect& rect) :
+	m_texture(std::move(texture)),
+	m_rect(rect),
+	m_origin(0.f, 0.f),
+	m_width(rect.w),
+	m_height(rect.h)
 {
 }
 
@@ -27,13 +25,14 @@ void Sprite::Resize(int _w, int _h)
 
 void Sprite::Draw(SDLpp_renderer& _renderer, const Transform& _cameraTransform, const Transform& _transform)
 {
-	if (m_texture == nullptr)
-		return;
+	SDL_Rect texRect = m_texture->GetRect();
 
-	Vector2f topLeftCorner = _transform.TransformPoint(Vector2f(0.f, 0.f));
-	Vector2f topRightCorner = _transform.TransformPoint(Vector2f(m_width, 0.f));
-	Vector2f bottomLeftCorner = _transform.TransformPoint(Vector2f(0.f, m_height));
-	Vector2f bottomRightCorner = _transform.TransformPoint(Vector2f(m_width, m_height));
+	Vector2f originPos = m_origin * Vector2f(m_width, m_height);
+
+	Vector2f topLeftCorner = transform.TransformPoint(Vector2f(0.f, 0.f) - originPos);
+	Vector2f topRightCorner = transform.TransformPoint(Vector2f(static_cast<float>(m_width), 0.f) - originPos);
+	Vector2f bottomLeftCorner = transform.TransformPoint(Vector2f(0.f, static_cast<float>(m_height)) - originPos);
+	Vector2f bottomRightCorner = transform.TransformPoint(Vector2f(static_cast<float>(m_width), static_cast<float>(m_height)) - originPos);
 
 	// Application de la caméra (transformation inverse)
 	topLeftCorner = _cameraTransform.TransformInversePoint(topLeftCorner);
@@ -78,6 +77,11 @@ int Sprite::GetHeight() const
 	return m_height;
 }
 
+const Vector2f& Sprite::GetOrigin() const
+{
+	return m_origin;
+}
+
 void Sprite::SetTexture(std::shared_ptr<const SDLpp_texture> _texture)
 {
 	m_texture = std::move(_texture);
@@ -89,4 +93,9 @@ void Sprite::SetTexture(std::shared_ptr<const SDLpp_texture> _texture)
 void Sprite::SetRect(SDL_Rect _rect)
 {
 	m_rect = _rect;
+}
+
+void Sprite::SetOrigin(const Vector2f& origin)
+{
+	m_origin = origin;
 }
