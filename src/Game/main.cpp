@@ -1,9 +1,8 @@
-#include <iostream>
 #include <SDL.h>
 #include <Engine/AnimationSystem.hpp>
 #include <Engine/CameraComponent.hpp>
 #include <Engine/GraphicsComponent.hpp>
-#include <Engine/Components/VelocityComponent.hpp>
+#include <Engine/SpritesheetComponent.hpp>
 #include <Engine/InputSystem.hpp>
 #include <Engine/Model.hpp>
 #include <Engine/RenderSystem.hpp>
@@ -12,18 +11,14 @@
 #include <Engine/SDLpp_Window.hpp>
 #include <Engine/SDLpp_ImGui.hpp>
 #include <Engine/SDLpp_Renderer.hpp>
-#include <Engine/SDLpp_Texture.hpp>
-#include <Engine/SDLpp_Window.hpp>
 #include <Engine/Sprite.hpp>
-#include <Engine/SpritesheetComponent.hpp>
 #include <Engine/Transform.hpp>
+#include <Engine/RigidBodyComponent.hpp>
 #include <Engine/VelocitySystem.hpp>
+#include <Engine/PhysicsSystem.hpp>
 #include <entt/entt.hpp>
 #include <fmt/core.h>
 #include <imgui.h>
-#include <imgui_impl_sdl.h>
-#include <imgui_impl_sdlrenderer.h>
-#include <chipmunk/chipmunk.h>
 
 
 entt::entity CreateCamera(entt::registry& registry);
@@ -47,9 +42,6 @@ int main(int argc, char** argv)
 
     SDLpp_imgui imgui(windowpp, rendererpp);
 
-    // Si on initialise ImGui dans une DLL (ce que nous faisons avec la classe SDLppImGui) et l'utilisons dans un autre exécutable (DLL/.exe)
-    // la bibliothèque nous demande d'appeler ImGui::SetCurrentContext dans l'exécutable souhaitant utiliser ImGui, avec le contexte précédemment récupéré
-    // Ceci est parce qu'ImGui utilise des variables globales en interne qui ne sont pas partagées entre la .dll et l'exécutable (comme indiqué dans sa documentation)
     ImGui::SetCurrentContext(imgui.GetContext());
 
     // ZQSD
@@ -75,6 +67,7 @@ int main(int argc, char** argv)
     AnimationSystem animSystem(registry);
     RenderSystem renderSystem(rendererpp, registry);
     VelocitySystem velocitySystem(registry);
+    PhysicsSystem physicsSystem(registry);
 
     entt::entity cameraEntity = CreateCamera(registry);
 
@@ -138,6 +131,7 @@ int main(int argc, char** argv)
         animSystem.Update(deltaTime);
         velocitySystem.Update(deltaTime);
         renderSystem.Update(deltaTime);
+        physicsSystem.Update(deltaTime);
 
         imgui.Render();
 
@@ -210,6 +204,7 @@ entt::entity CreateRunner(entt::registry& registry, std::shared_ptr<Spritesheet>
     registry.emplace<SpritesheetComponent>(entity, spritesheet, sprite);
     registry.emplace<GraphicsComponent>(entity, std::move(sprite));
     registry.emplace<Transform>(entity);
+    registry.emplace<RigidBodyComponent>(entity, 100.f);
 
     return entity;
 }

@@ -1,7 +1,7 @@
 #include <Engine/sprite.hpp>
 #include <Engine/sdlpp_renderer.hpp>
 #include <Engine/sdlpp_texture.hpp>
-#include "Engine/transform.hpp"
+#include <Engine/Transform.hpp>
 
 Sprite::Sprite(std::shared_ptr<const SDLpp_texture> texture) :
 	Sprite(std::move(texture), texture->GetRect())
@@ -29,18 +29,16 @@ void Sprite::Draw(SDLpp_renderer& _renderer, const Transform& _cameraTransform, 
 
 	Vector2f originPos = m_origin * Vector2f(m_width, m_height);
 
-	Vector2f topLeftCorner = transform.TransformPoint(Vector2f(0.f, 0.f) - originPos);
-	Vector2f topRightCorner = transform.TransformPoint(Vector2f(static_cast<float>(m_width), 0.f) - originPos);
-	Vector2f bottomLeftCorner = transform.TransformPoint(Vector2f(0.f, static_cast<float>(m_height)) - originPos);
-	Vector2f bottomRightCorner = transform.TransformPoint(Vector2f(static_cast<float>(m_width), static_cast<float>(m_height)) - originPos);
+	Vector2f topLeftCorner = _transform.TransformPoint(Vector2f(0.f, 0.f) - originPos);
+	Vector2f topRightCorner = _transform.TransformPoint(Vector2f(static_cast<float>(m_width), 0.f) - originPos);
+	Vector2f bottomLeftCorner = _transform.TransformPoint(Vector2f(0.f, static_cast<float>(m_height)) - originPos);
+	Vector2f bottomRightCorner = _transform.TransformPoint(Vector2f(static_cast<float>(m_width), static_cast<float>(m_height)) - originPos);
 
 	// Application de la caméra (transformation inverse)
 	topLeftCorner = _cameraTransform.TransformInversePoint(topLeftCorner);
 	topRightCorner = _cameraTransform.TransformInversePoint(topRightCorner);
 	bottomLeftCorner = _cameraTransform.TransformInversePoint(bottomLeftCorner);
 	bottomRightCorner = _cameraTransform.TransformInversePoint(bottomRightCorner);
-
-	SDL_Rect texRect = m_texture->GetRect();
 
 	float invWidth = 1.f / texRect.w;
 	float invHeight = 1.f / texRect.h;
