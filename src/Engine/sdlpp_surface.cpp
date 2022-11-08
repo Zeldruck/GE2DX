@@ -8,7 +8,8 @@ SDLpp_surface::SDLpp_surface(int width, int height)
 	m_surface = SDL_CreateRGBSurfaceWithFormat(0, width, height, 32, SDL_PIXELFORMAT_RGBA32);
 }
 
-SDLpp_surface::SDLpp_surface(SDLpp_surface&& _surface) noexcept
+SDLpp_surface::SDLpp_surface(SDLpp_surface&& _surface) noexcept :
+	m_filepath(std::move(_surface.m_filepath))
 {
 	std::swap(m_surface, _surface.m_surface);
 }
@@ -21,9 +22,15 @@ SDLpp_surface::~SDLpp_surface()
 
 SDLpp_surface& SDLpp_surface::operator=(SDLpp_surface&& _surface) noexcept
 {
+	m_filepath = std::move(_surface.m_filepath);
 	std::swap(m_surface, _surface.m_surface);
 
 	return *this;
+}
+
+const std::string& SDLpp_surface::GetFilepath() const
+{
+	return m_filepath;
 }
 
 SDL_Surface* SDLpp_surface::GetHandle() const
@@ -42,14 +49,14 @@ bool SDLpp_surface::IsValid() const
 	return m_surface != nullptr;
 }
 
-SDLpp_surface SDLpp_surface::LoadFromFile(const std::string& _filepath)
+SDLpp_surface SDLpp_surface::LoadFromFile(std::string _filepath)
 {
 	SDL_Surface* surface = IMG_Load(_filepath.c_str());
 
 	if (!surface)
 		std::cerr << IMG_GetError() << std::endl;
 
-	return SDLpp_surface(surface);
+	return SDLpp_surface(surface, std::move(_filepath));
 }
 
 Uint8* SDLpp_surface::GetPixels()
@@ -62,7 +69,8 @@ const Uint8* SDLpp_surface::GetPixels() const
 	return static_cast<const Uint8*>(m_surface->pixels);
 }
 
-SDLpp_surface::SDLpp_surface(SDL_Surface* _surface):
-	m_surface(_surface)
+SDLpp_surface::SDLpp_surface(SDL_Surface* surface, std::string filepath) :
+	m_surface(surface),
+	m_filepath(std::move(filepath))
 {
 }

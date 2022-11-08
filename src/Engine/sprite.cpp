@@ -25,7 +25,7 @@ void Sprite::Resize(int _w, int _h)
 	m_height = _h;
 }
 
-void Sprite::Draw(SDLpp_renderer& _renderer, const Transform& _transform)
+void Sprite::Draw(SDLpp_renderer& _renderer, const Transform& _cameraTransform, const Transform& _transform)
 {
 	if (m_texture == nullptr)
 		return;
@@ -34,6 +34,12 @@ void Sprite::Draw(SDLpp_renderer& _renderer, const Transform& _transform)
 	Vector2f topRightCorner = _transform.TransformPoint(Vector2f(m_width, 0.f));
 	Vector2f bottomLeftCorner = _transform.TransformPoint(Vector2f(0.f, m_height));
 	Vector2f bottomRightCorner = _transform.TransformPoint(Vector2f(m_width, m_height));
+
+	// Application de la caméra (transformation inverse)
+	topLeftCorner = _cameraTransform.TransformInversePoint(topLeftCorner);
+	topRightCorner = _cameraTransform.TransformInversePoint(topRightCorner);
+	bottomLeftCorner = _cameraTransform.TransformInversePoint(bottomLeftCorner);
+	bottomRightCorner = _cameraTransform.TransformInversePoint(bottomRightCorner);
 
 	SDL_Rect texRect = m_texture->GetRect();
 
@@ -59,7 +65,7 @@ void Sprite::Draw(SDLpp_renderer& _renderer, const Transform& _transform)
 
 	int indices[6] = { 0, 1, 2, 2, 1, 3 };
 
-	SDL_RenderGeometry(_renderer.GetHandle(), m_texture->GetHandle(), vert, 4, indices, 6);
+	SDL_RenderGeometry(_renderer.GetHandle(), (m_texture) ? m_texture->GetHandle() : nullptr, vert, 4, indices, 6);
 }
 
 int Sprite::GetWidth() const

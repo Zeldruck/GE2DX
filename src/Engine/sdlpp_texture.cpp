@@ -2,7 +2,8 @@
 #include <Engine/sdlpp_renderer.hpp>
 #include <Engine/sdlpp_surface.hpp>
 
-SDLpp_texture::SDLpp_texture(SDLpp_texture&& _texturepp) noexcept
+SDLpp_texture::SDLpp_texture(SDLpp_texture&& _texturepp) noexcept:
+	m_filepath(std::move(_texturepp.m_filepath))
 {
 	m_texture = _texturepp.m_texture;
 	_texturepp.m_texture = nullptr;
@@ -16,6 +17,7 @@ SDLpp_texture::~SDLpp_texture()
 
 SDLpp_texture& SDLpp_texture::operator=(SDLpp_texture&& _texturepp) noexcept
 {
+	m_filepath = std::move(_texturepp.m_filepath);
 	std::swap(m_texture, _texturepp.m_texture);
 
 	return *this;
@@ -30,7 +32,12 @@ SDLpp_texture SDLpp_texture::LoadFromSurface(SDLpp_renderer& _renderer, const SD
 {
 	SDL_Texture* texture = SDL_CreateTextureFromSurface(_renderer.GetHandle(), _surface.GetHandle());
 
-	return SDLpp_texture(texture);
+	return SDLpp_texture(texture, _surface.GetFilepath());
+}
+
+const std::string& SDLpp_texture::GetFilepath() const
+{
+	return m_filepath;
 }
 
 SDL_Texture* SDLpp_texture::GetHandle() const
@@ -48,7 +55,8 @@ SDL_Rect SDLpp_texture::GetRect() const
 	return rect;
 }
 
-SDLpp_texture::SDLpp_texture(SDL_Texture* _texture) :
-	m_texture(_texture)
+SDLpp_texture::SDLpp_texture(SDL_Texture* texture, std::string filepath) :
+	m_texture(texture),
+	m_filepath(std::move(filepath))
 {
 }

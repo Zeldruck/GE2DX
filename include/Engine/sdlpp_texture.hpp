@@ -21,14 +21,15 @@ public:
 	static SDLpp_texture LoadFromFile(SDLpp_renderer&, const std::string&);
 	static SDLpp_texture LoadFromSurface(SDLpp_renderer&, const SDLpp_surface&);
 	
-
+	const std::string& GetFilepath() const;
 	SDL_Texture* GetHandle() const;
 	SDL_Rect GetRect() const;
 
 
 private:
-	SDLpp_texture(SDL_Texture*);
+	SDLpp_texture(SDL_Texture* texture, std::string filepath = "");
 
+	std::string m_filepath;
 	SDL_Texture* m_texture;
 };
 

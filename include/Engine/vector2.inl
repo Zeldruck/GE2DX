@@ -1,4 +1,6 @@
-#include "vector2.hpp"
+#include <Engine/vector2.hpp>
+#include <Engine/utilities.hpp>
+#include <cmath>
 
 template<typename T>
 Vector2<T>::Vector2(T V) :
@@ -12,6 +14,20 @@ Vector2<T>::Vector2(T X, T Y) :
 	x(X),
 	y(Y)
 {
+}
+
+template<typename T>
+Vector2<T> Vector2<T>::Rotate(const Vector2& vec, float degrees)
+{
+	float radRotation = Deg2Rad * degrees;
+	float s = std::sin(radRotation);
+	float c = std::cos(radRotation);
+
+	Vector2 rotatedVec;
+	rotatedVec.x = vec.x * c - vec.y * s;
+	rotatedVec.y = vec.x * s + vec.y * c;
+
+	return rotatedVec;
 }
 
 template<typename T>

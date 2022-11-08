@@ -8,6 +8,7 @@
 
 class SDLpp_texture;
 class SDLpp_renderer;
+class Model;
 
 class GE2DX_ENGINE_API ResourceManager
 {
@@ -24,12 +25,15 @@ public:
 
 	void Clear();
 
+	const std::shared_ptr<Model>& GetModel(const std::string& texturePath);
 	const std::shared_ptr<SDLpp_texture>& GetTexture(const std::string& texturePath);
 
 	void Purge();
 
 private:
+	std::shared_ptr<Model> m_missingModel;
 	std::shared_ptr<SDLpp_texture> m_missingTexture;
+	std::unordered_map<std::string /*texturePath*/, std::shared_ptr<Model>> m_models;
 	std::unordered_map<std::string /*texturePath*/, std::shared_ptr<SDLpp_texture>> m_textures;
 
 	SDLpp_renderer& m_renderer;

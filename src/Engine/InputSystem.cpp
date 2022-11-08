@@ -1,8 +1,25 @@
 #include <Engine/InputSystem.hpp>
+#include <stdexcept>
+
+InputSystem::InputSystem()
+{
+	if (s_instance != nullptr)
+		throw std::runtime_error("only one InputSystem can be created");
+
+	s_instance = this;
+}
+
+InputSystem::~InputSystem()
+{
+	s_instance = nullptr;
+}
 
 void InputSystem::BindKeyPressed(SDL_KeyCode keyCode, std::string action)
 {
-	m_keyToAction[keyCode] = std::move(action);
+	if (!action.empty())
+		m_keyToAction[keyCode] = std::move(action);
+	else
+		m_keyToAction.erase(keyCode);
 }
 
 void InputSystem::BindMouseButtonPressed(MouseButton button, std::string action)
@@ -49,11 +66,29 @@ void InputSystem::HandleEvent(const SDL_Event& event)
 		break;
 	}
 
+	case SDL_CONTROLLERBUTTONUP:
+	{
+		auto it = m_controllerButtonToAction.find(static_cast<SDL_GameControllerButton>(event.cbutton.button));
+		if (it != m_controllerButtonToAction.end())
+			ReleaseAction(it->second);
+
+		break;
+	}
+
 	case SDL_KEYDOWN:
 	{
 		auto it = m_keyToAction.find(event.key.keysym.sym);
 		if (it != m_keyToAction.end())
 			TriggerAction(it->second);
+
+		break;
+	}
+
+	case SDL_KEYUP:
+	{
+		auto it = m_keyToAction.find(event.key.keysym.sym);
+		if (it != m_keyToAction.end())
+			ReleaseAction(it->second);
 
 		break;
 	}
@@ -66,26 +101,70 @@ void InputSystem::HandleEvent(const SDL_Event& event)
 
 		break;
 	}
+
+	case SDL_MOUSEBUTTONUP:
+	{
+		auto it = m_mouseButtonToAction.find(event.button.button);
+		if (it != m_mouseButtonToAction.end())
+			ReleaseAction(it->second);
+
+		break;
+	}
 	}
 }
 
-void InputSystem::OnAction(std::string action, std::function<void()> func)
+bool InputSystem::IsActive(const std::string& action) const
 {
-	m_actionToFunc[std::move(action)] = std::move(func);
+	auto it = m_actions.find(action);
+	if (it == m_actions.end())
+		return false;
+
+	const ActionData& actionData = it->second;
+	return actionData.isActive;
+}
+
+void InputSystem::OnAction(std::string action, std::function<void(bool)> func)
+{
+	ActionData& actionData = GetActionData(action);
+	actionData.func = std::move(func);
 }
 
 InputSystem& InputSystem::Instance()
 {
-	static InputSystem InputSystem;
-	return InputSystem;
+	if (!s_instance)
+		throw std::runtime_error("InputSystem hasn't been instantied");
+
+	return *s_instance;
+}
+
+InputSystem::ActionData& InputSystem::GetActionData(const std::string& action)
+{
+	auto it = m_actions.find(action);
+	if (it != m_actions.end())
+		return it->second;
+	else
+	{
+		ActionData& actionData = m_actions[action];
+		actionData.isActive = false;
+
+		return actionData;
+	}
 }
 
 void InputSystem::TriggerAction(const std::string& action)
 {
-	auto it = m_actionToFunc.find(action);
-	if (it != m_actionToFunc.end())
-	{
-		std::function<void()>& func = it->second;
-		func();
-	}
+	ActionData& actionData = GetActionData(action);
+	actionData.isActive = true;
+	if (actionData.func)
+		actionData.func(true);
 }
+
+void InputSystem::ReleaseAction(const std::string& action)
+{
+	ActionData& actionData = GetActionData(action);
+	actionData.isActive = false;
+	if (actionData.func)
+		actionData.func(false);
+}
+
+InputSystem* InputSystem::s_instance = nullptr;

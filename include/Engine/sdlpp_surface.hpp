@@ -16,22 +16,24 @@ public:
 	SDLpp_surface& operator=(const SDLpp_surface&) = delete;
 	SDLpp_surface& operator=(SDLpp_surface&&) noexcept;
 
+	const std::string& GetFilepath() const;
 	SDL_Surface* GetHandle() const;
 
 	void FillRect(const SDL_Rect& rect, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 
 	bool IsValid() const;
 
-	static SDLpp_surface LoadFromFile(const std::string&);
+	static SDLpp_surface LoadFromFile(std::string filepath);
 
 public:
 	Uint8* GetPixels();
 	const Uint8* GetPixels() const;
 
 private:
-	SDLpp_surface(SDL_Surface*);
+	SDLpp_surface(SDL_Surface* surface, std::string filepath = "");
 
 	SDL_Surface* m_surface;
+	std::string m_filepath;
 };
 
 #endif // !_SDLPP_SURFACE_HPP_

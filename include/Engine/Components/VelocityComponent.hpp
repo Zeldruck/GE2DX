@@ -1,11 +1,9 @@
-#ifndef _VELOCITYCOMPONENT_HPP_
-#define _VELOCITYCOMPONENT_HPP_
+#pragma once
 
 #include <Engine/vector2.hpp>
 
 struct VelocityComponent
 {
-	Vector2f velocity;
+	Vector2f linearVel = Vector2f(0.f, 0.f);
+	float angularVel = 0.f;
 };
-
-#endif

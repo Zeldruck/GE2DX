@@ -2,6 +2,7 @@
 #define _SPRITE_HPP_
 
 #include <Engine/Export.hpp>
+#include <Engine/Renderable.hpp>
 #include <SDL.h>
 #include <memory>
 
@@ -9,7 +10,7 @@ class SDLpp_texture;
 class SDLpp_renderer;
 class Transform;
 
-class GE2DX_ENGINE_API Sprite
+class GE2DX_ENGINE_API Sprite : public Renderable
 {
 public:
 	Sprite();
@@ -24,7 +25,7 @@ public:
 
 	void Resize(int, int);
 
-	void Draw(SDLpp_renderer&, const Transform&);
+	void Draw(SDLppRenderer& renderer, const Transform& cameraTransform, const Transform& transform) override;
 
 	int GetWidth() const;
 	int GetHeight() const;
