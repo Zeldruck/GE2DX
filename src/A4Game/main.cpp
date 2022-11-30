@@ -146,6 +146,7 @@ void Game(SDLppWindow& _window, SDLppRenderer& _renderer)
 {
 	GameManager::Instance().OpenState();
 
+	srand(time(NULL));
 
 
 	SDLppImGui imgui(_window, _renderer);
@@ -173,6 +174,7 @@ void Game(SDLppWindow& _window, SDLppRenderer& _renderer)
 	// Set collisions layer
 	CollisionLayersManager::Instance().AddCollisionLayer("DEFAULT");
 	CollisionLayersManager::Instance().AddCollisionLayer("BIRD");
+	CollisionLayersManager::Instance().AddCollisionLayer("DEATH");
 	CollisionLayersManager::Instance().AddCollisionLayer("BORDER");
 	CollisionLayersManager::Instance().AddCollisionLayer("PIPE");
 	CollisionLayersManager::Instance().AddCollisionLayer("PIPES_DESTROYER");
@@ -190,6 +192,13 @@ void Game(SDLppWindow& _window, SDLppRenderer& _renderer)
 		CollisionLayersManager::Instance().Get("BIRD"),
 		CollisionLayersManager::Instance().Get("BORDER"));
 	collisionHandlerBirdBorder->postSolveFunc = cpCollisionPostSolveFunc(BirdDeath);
+
+	// Collision between bird and death object -> death
+	cpCollisionHandler* collisionHandlerBirdDeathObject = cpSpaceAddCollisionHandler(
+		PhysicsSystem::Instance()->GetSpace().GetHandle(),
+		CollisionLayersManager::Instance().Get("BIRD"),
+		CollisionLayersManager::Instance().Get("DEATH"));
+	collisionHandlerBirdDeathObject->postSolveFunc = cpCollisionPostSolveFunc(BirdDeath);
 
 	// Collision between bird and pipes -> death
 	cpCollisionHandler* collisionHandlerBirdPipe = cpSpaceAddCollisionHandler(
@@ -248,12 +257,16 @@ void Game(SDLppWindow& _window, SDLppRenderer& _renderer)
 	std::shared_ptr<CollisionShape> boxShape = std::make_shared<BoxShape>(256.f, 256.f);
 	boxShape->SetCollisionLayer("BORDER");
 
-	entt::entity pipe1 = PipesManager::Instance().CreatePipe({ 1280.f, 0.f }, 300.f);
-	entt::entity pipe2 = PipesManager::Instance().CreatePipe({ 1280.f, 720.f }, 300.f);
-	entt::entity pipe3 = PipesManager::Instance().CreatePipe({ 1920.f, 0.f }, 300.f);
-	entt::entity pipe4 = PipesManager::Instance().CreatePipe({ 1920.f, 720.f }, 300.f);
-	entt::entity pipe5 = PipesManager::Instance().CreatePipe({ 2460.f, 0.f }, 300.f);
-	entt::entity pipe6 = PipesManager::Instance().CreatePipe({ 2460.f, 720.f }, 300.f);
+	std::string pipeCollisionLayerName = "PIPE";
+	std::string pipeCollisionDeathLayerName = "DEATH";
+
+	PipesManager::Instance().CreatePipes(1408.f, 300.f);
+	PipesManager::Instance().CreatePipes(2176.f, 300.f);
+
+	/*entt::entity pipe1 = PipesManager::Instance().CreatePipe({1408.f, 0.f}, 300.f, pipeCollisionLayerName);
+	entt::entity pipe2 = PipesManager::Instance().CreatePipe({ 1408.f, 720.f }, 300.f, pipeCollisionDeathLayerName);
+	entt::entity pipe3 = PipesManager::Instance().CreatePipe({ 2176.f, 0.f }, 300.f, pipeCollisionLayerName);
+	entt::entity pipe4 = PipesManager::Instance().CreatePipe({ 2176.f, 720.f }, 300.f, pipeCollisionDeathLayerName);*/
 
 	/*entt::entity pipeU = CreatePipes(registry, boxShape);
 	registry.get<RigidBodyComponent>(pipeU).TeleportTo({ 960.f, 0.f });
@@ -316,7 +329,7 @@ void Game(SDLppWindow& _window, SDLppRenderer& _renderer)
 
 		ImGui::End();
 
-		physicsSystem.DebugDraw(_renderer, registry.get<Transform>(cameraEntity).GetTransformMatrix().Inverse());
+		//physicsSystem.DebugDraw(_renderer, registry.get<Transform>(cameraEntity).GetTransformMatrix().Inverse());
 
 		imgui.Render();
 		_renderer.Present();
@@ -378,8 +391,10 @@ cpBool RespawnPipes(cpArbiter* arb, cpSpace* space, void* data)
 {
 	PipesManager::Instance().EreaseFirstTwoPipes();
 
-	PipesManager::Instance().CreatePipe({1280.f, 0.f}, 300.f);
-	PipesManager::Instance().CreatePipe({ 1280.f, 720.f }, 300.f);
+	PipesManager::Instance().CreatePipes(1408.f, 300.f);
+
+	/*PipesManager::Instance().CreatePipe({1408.f, 0.f}, 300.f, "PIPE");
+	PipesManager::Instance().CreatePipe({ 1408.f, 720.f }, 300.f, "DEATH");*/
 
 	return cpTrue;
 }

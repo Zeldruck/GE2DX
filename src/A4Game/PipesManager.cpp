@@ -5,6 +5,7 @@
 #include <A4Engine/RigidBodyComponent.hpp>
 #include <A4Engine/Transform.hpp>
 #include <stdexcept>
+#include <cstdlib>
 
 PipesManager::PipesManager(entt::registry& _registry) :
 	registry(_registry)
@@ -20,13 +21,15 @@ PipesManager::~PipesManager()
 	s_instance = nullptr;
 }
 
-entt::entity PipesManager::CreatePipe(Vector2f _position, float _speed)
+entt::entity PipesManager::CreatePipe(Vector2f _position, float _speed, const std::string& _collisionLayer = "")
 {
 	std::shared_ptr<Sprite> box = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/box.png"));
 	box->SetOrigin({ 0.5f, 0.5f });
+	box->Resize(box->GetWidth(), 384);
 
 	std::shared_ptr<CollisionShape> boxShape = std::make_shared<BoxShape>(box->GetWidth(), box->GetHeight());
-	boxShape->SetCollisionLayer("PIPE");
+	if (!_collisionLayer.empty())
+		boxShape->SetCollisionLayer(_collisionLayer);
 
 	entt::entity entity = registry.create();
 	registry.emplace<GraphicsComponent>(entity, std::move(box));
@@ -35,6 +38,16 @@ entt::entity PipesManager::CreatePipe(Vector2f _position, float _speed)
 	pipeEntitiesToConstruct.push_back(PipePoolData{ std::make_shared<entt::entity>(entity), boxShape, _position, _speed });
 
 	return entity;
+}
+
+void PipesManager::CreatePipes(float _xPosition, float _speed)
+{
+	float yPercentage = (rand() % 51 - 25) / 100.f;
+
+	printf("Y Percentage: %f\n", yPercentage);
+
+	CreatePipe(Vector2f{ _xPosition, yPercentage * 720.f }, _speed, "PIPE");
+	CreatePipe(Vector2f{ _xPosition, (1.f + yPercentage) * 720.f }, _speed, "DEATH");
 }
 
 void PipesManager::AddPipe(entt::entity& _pipeEntity)

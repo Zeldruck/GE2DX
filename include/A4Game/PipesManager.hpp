@@ -23,7 +23,8 @@ class PipesManager
 		PipesManager(PipesManager&&) = delete;
 		~PipesManager();
 
-		entt::entity CreatePipe(Vector2f _position, float _speed);
+		entt::entity CreatePipe(Vector2f _position, float _speed, const std::string& _collisionLayer);
+		void CreatePipes(float xPosition, float _speed);
 
 		void AddPipe(entt::entity& _pipeEntity);
 		void EreaseFirstTwoPipes();

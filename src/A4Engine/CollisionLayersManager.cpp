@@ -4,7 +4,7 @@
 CollisionLayersManager::CollisionLayersManager()
 {
 	if (s_instance != nullptr)
-		throw std::runtime_error("only one CollisionLayersManager can be created");
+		throw std::runtime_error("only one CollisionLayersManager can be created\n");
 
 	s_instance = this;
 
@@ -36,7 +36,7 @@ cpCollisionType& CollisionLayersManager::Get(const std::string& _LAYER_NAME)
 {
 	if (m_collisionLayers.find(_LAYER_NAME) == m_collisionLayers.end())
 	{
-		printf("Collision layer, does not exist, creating it right away...");
+		printf("Collision layer does not exist, creating it right away..., (%s)\n", _LAYER_NAME.c_str());
 		AddCollisionLayer(_LAYER_NAME);
 	}
 
