@@ -38,6 +38,8 @@ class A4ENGINE_API RigidBodyComponent
 		void TeleportTo(const Vector2f& position);
 		void TeleportTo(const Vector2f& position, float rotation);
 
+		void SetAllCollisionsLayer(const std::string& _LAYER);
+
 	private:
 		void RecomputeMoment();
 		

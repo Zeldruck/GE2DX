@@ -117,3 +117,15 @@ void RigidBodyComponent::RecomputeMoment()
 	
 	m_body.SetMoment(moment);
 }
+
+void RigidBodyComponent::SetAllCollisionsLayer(const std::string& _LAYER)
+{
+	auto it = m_shapes.begin();
+
+	while (it != m_shapes.end())
+	{
+		it->second.physicsShape.SetCollisionType(_LAYER);
+
+		it++;
+	}
+}

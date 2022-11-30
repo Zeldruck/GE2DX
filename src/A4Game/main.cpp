@@ -24,13 +24,14 @@
 #include <imgui.h>
 #include <A4Game/GameManager.hpp>
 #include <A4Engine/CollisionHandlerManager.hpp>
+#include <A4Game/PipesManager.hpp>
 
 entt::entity CreateCamera(entt::registry& registry);
-entt::entity CreatePipes(entt::registry& registry, std::shared_ptr<CollisionShape> shape);
 entt::entity CreateBird(entt::registry& registry);
 
 cpBool BirdDeath(cpArbiter* arb, cpSpace* space, void* data);
-void RespawnPipes(cpArbiter* arb, cpSpace* space, void* data);
+cpBool RespawnPipes(cpArbiter* arb, cpSpace* space, void* data);
+
 
 void EntityInspector(const char* windowName, entt::registry& registry, entt::entity entity);
 
@@ -43,9 +44,11 @@ struct InputComponent
 };
 
 struct PlayerControlled {};
+struct NoGravity {};
 
 void PlayerControllerSystem(entt::registry& registry);
 void PlayerInputSystem(entt::registry& registry);
+void NoGravitySystem(entt::registry& registry);
 
 int main()
 {
@@ -93,7 +96,7 @@ void Menu(SDLppWindow& _window, SDLppRenderer& _renderer)
 	while (GameManager::Instance().IsStateOpen())
 	{
 		Uint64 now = SDL_GetPerformanceCounter();
-		float deltaTime = static_cast<float>(now - lastUpdate) / SDL_GetPerformanceFrequency();
+		float deltaTime = (now - lastUpdate) / SDL_GetPerformanceFrequency();
 		lastUpdate = now;
 
 		SDL_Event event;
@@ -156,6 +159,8 @@ void Game(SDLppWindow& _window, SDLppRenderer& _renderer)
 
 
 	entt::registry registry;
+
+	PipesManager pipesManager(registry);
 	
 	AnimationSystem animSystem(registry);
 	RenderSystem renderSystem(_renderer, registry);
@@ -166,17 +171,39 @@ void Game(SDLppWindow& _window, SDLppRenderer& _renderer)
 
 
 	// Set collisions layer
+	CollisionLayersManager::Instance().AddCollisionLayer("DEFAULT");
 	CollisionLayersManager::Instance().AddCollisionLayer("BIRD");
-	CollisionLayersManager::Instance().AddCollisionLayer("WALL");
+	CollisionLayersManager::Instance().AddCollisionLayer("BORDER");
+	CollisionLayersManager::Instance().AddCollisionLayer("PIPE");
+	CollisionLayersManager::Instance().AddCollisionLayer("PIPES_DESTROYER");
 
 	//Set collisions trigger/handler
+	/*
+	* ! NOT WORKING !
+	*/
 	//CollisionHandlerManager::Instance().AddCollisionHandler("BW_Death", PhysicsSystem::Instance()->GetSpace(), "BIRD", "WALL");
 	//CollisionHandlerManager::Instance().SetHandlerPostSolveFunc("BW_Death", cpCollisionPostSolveFunc(BirdDeath));
-	cpCollisionHandler* collisionHandlerDeath = cpSpaceAddCollisionHandler(
+
+	// Collision between bird and border -> death
+	cpCollisionHandler* collisionHandlerBirdBorder = cpSpaceAddCollisionHandler(
 		PhysicsSystem::Instance()->GetSpace().GetHandle(),
 		CollisionLayersManager::Instance().Get("BIRD"),
-		CollisionLayersManager::Instance().Get("WALL"));
-	collisionHandlerDeath->postSolveFunc = cpCollisionPostSolveFunc(BirdDeath);
+		CollisionLayersManager::Instance().Get("BORDER"));
+	collisionHandlerBirdBorder->postSolveFunc = cpCollisionPostSolveFunc(BirdDeath);
+
+	// Collision between bird and pipes -> death
+	cpCollisionHandler* collisionHandlerBirdPipe = cpSpaceAddCollisionHandler(
+		PhysicsSystem::Instance()->GetSpace().GetHandle(),
+		CollisionLayersManager::Instance().Get("BIRD"),
+		CollisionLayersManager::Instance().Get("PIPE"));
+	collisionHandlerBirdPipe->postSolveFunc = cpCollisionPostSolveFunc(BirdDeath);
+
+	// Collision between pipes and pipe destroyer line
+	cpCollisionHandler* collisionHandlerPipeDestroyer = cpSpaceAddCollisionHandler(
+		PhysicsSystem::Instance()->GetSpace().GetHandle(),
+		CollisionLayersManager::Instance().Get("PIPE"),
+		CollisionLayersManager::Instance().Get("PIPES_DESTROYER"));
+	collisionHandlerPipeDestroyer->postSolveFunc = cpCollisionPostSolveFunc(RespawnPipes);//
 	
 
 
@@ -186,7 +213,7 @@ void Game(SDLppWindow& _window, SDLppRenderer& _renderer)
 
 	// Game's border shape
 	std::shared_ptr<CollisionShape> borderShape = std::make_shared<SegmentShape>(Vector2f(0.f, 0.f), Vector2f(1280.f, 0.f));
-	borderShape->SetCollisionLayer("WALL");
+	borderShape->SetCollisionLayer("BORDER");
 
 	// Upper border
 	entt::entity upperBorder = registry.create();
@@ -199,6 +226,17 @@ void Game(SDLppWindow& _window, SDLppRenderer& _renderer)
 	lowerPhysics.AddShape(borderShape);
 	lowerPhysics.TeleportTo({ 0.f, 720.f });
 
+	// Pipes border destroyer shape
+	std::shared_ptr<CollisionShape> pDestroyerShape = std::make_shared<SegmentShape>(Vector2f(0.f, 0.f), Vector2f(0.f, 720.f));
+	pDestroyerShape->SetCollisionLayer("PIPES_DESTROYER");
+
+	// Pipes destroyer
+	entt::entity pDestroyerBorder = registry.create();
+	auto& pdPhysics = registry.emplace<RigidBodyComponent>(pDestroyerBorder, 10.f, 0.f);
+	pdPhysics.AddShape(pDestroyerShape);
+	pdPhysics.TeleportTo({ -256.f, 0.f });
+	registry.emplace<NoGravity>(pDestroyerBorder);
+
 
 	entt::entity bird = CreateBird(registry);
 	// Player pressed space in menu, so make the bird jump right away
@@ -208,11 +246,19 @@ void Game(SDLppWindow& _window, SDLppRenderer& _renderer)
 
 
 	std::shared_ptr<CollisionShape> boxShape = std::make_shared<BoxShape>(256.f, 256.f);
+	boxShape->SetCollisionLayer("BORDER");
 
-	entt::entity pipeU = CreatePipes(registry, boxShape);
+	entt::entity pipe1 = PipesManager::Instance().CreatePipe({ 1280.f, 0.f }, 300.f);
+	entt::entity pipe2 = PipesManager::Instance().CreatePipe({ 1280.f, 720.f }, 300.f);
+	entt::entity pipe3 = PipesManager::Instance().CreatePipe({ 1920.f, 0.f }, 300.f);
+	entt::entity pipe4 = PipesManager::Instance().CreatePipe({ 1920.f, 720.f }, 300.f);
+	entt::entity pipe5 = PipesManager::Instance().CreatePipe({ 2460.f, 0.f }, 300.f);
+	entt::entity pipe6 = PipesManager::Instance().CreatePipe({ 2460.f, 720.f }, 300.f);
+
+	/*entt::entity pipeU = CreatePipes(registry, boxShape);
 	registry.get<RigidBodyComponent>(pipeU).TeleportTo({ 960.f, 0.f });
 	entt::entity pipeD = CreatePipes(registry, boxShape);
-	registry.get<RigidBodyComponent>(pipeD).TeleportTo({ 960.f, 720.f });
+	registry.get<RigidBodyComponent>(pipeD).TeleportTo({ 960.f, 720.f });*/
 
 	Uint64 lastUpdate = SDL_GetPerformanceCounter();
 
@@ -256,8 +302,13 @@ void Game(SDLppWindow& _window, SDLppRenderer& _renderer)
 		animSystem.Update(deltaTime);
 		renderSystem.Update(deltaTime);
 
+		NoGravitySystem(registry);
+
 		PlayerInputSystem(registry);
 		PlayerControllerSystem(registry);
+
+		//pipesManager.FreePipes();
+		pipesManager.Update();
 
 		ImGui::Begin("Score");
 
@@ -304,6 +355,17 @@ void PlayerInputSystem(entt::registry& registry)
 	}
 }
 
+void NoGravitySystem(entt::registry& registry)
+{
+	auto view = registry.view<RigidBodyComponent, NoGravity>();
+	for (entt::entity entity : view)
+	{
+		auto& entityPhysics = view.get<RigidBodyComponent>(entity);
+
+		entityPhysics.SetLinearVelocity({0.f, 0.f});
+	}
+}
+
 cpBool BirdDeath(cpArbiter* arb, cpSpace* space, void* data)
 {
 	GameManager::Instance().CloseState();
@@ -312,7 +374,15 @@ cpBool BirdDeath(cpArbiter* arb, cpSpace* space, void* data)
 	return cpTrue;
 }
 
-void RespawnPipes(entt::registry& registry, std::shared_ptr<CollisionShape> shape, Vector2f centerPosition);
+cpBool RespawnPipes(cpArbiter* arb, cpSpace* space, void* data)
+{
+	PipesManager::Instance().EreaseFirstTwoPipes();
+
+	PipesManager::Instance().CreatePipe({1280.f, 0.f}, 300.f);
+	PipesManager::Instance().CreatePipe({ 1280.f, 720.f }, 300.f);
+
+	return cpTrue;
+}
 
 void EntityInspector(const char* windowName, entt::registry& registry, entt::entity entity)
 {
@@ -366,25 +436,6 @@ entt::entity CreateCamera(entt::registry& registry)
 	/*RigidBodyComponent& rgbc = registry.emplace<RigidBodyComponent>(entity, RigidBodyComponent::Static{});
 
 	rgbc.SetLinearVelocity({ 100.f, 0.f });*/
-
-	return entity;
-}
-
-entt::entity CreatePipes(entt::registry& registry, std::shared_ptr<CollisionShape> shape)
-{
-	std::shared_ptr<Sprite> box = std::make_shared<Sprite>(ResourceManager::Instance().GetTexture("assets/box.png"));
-	box->SetOrigin({ 0.5f, 0.5f });
-
-	std::shared_ptr<CollisionShape> boxShape = std::make_shared<BoxShape>(box->GetWidth(), box->GetHeight());
-	boxShape->SetCollisionLayer("WALL");
-
-	entt::entity entity = registry.create();
-	registry.emplace<GraphicsComponent>(entity, std::move(box));
-	registry.emplace<Transform>(entity);
-
-	auto& entityPhysics = registry.emplace<RigidBodyComponent>(entity, RigidBodyComponent::Kinematic{});
-	entityPhysics.AddShape(std::move(boxShape));
-	entityPhysics.SetLinearVelocity({ -100.f, 0.f });
 
 	return entity;
 }
